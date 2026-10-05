@@ -1,0 +1,62 @@
+name: Update Coding Test README
+
+on:
+  push:
+    paths-ignore:
+      - 'README.md'
+
+permissions:
+  contents: write
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Count solved problems
+        run: |
+          LEVEL0=$(find "프로그래머스/0" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l)
+          LEVEL1=$(find "프로그래머스/1" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l)
+          LEVEL2=$(find "프로그래머스/2" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l)
+
+          TOTAL=$((LEVEL0 + LEVEL1 + LEVEL2))
+
+          cat > README.md << EOF
+          # 🐍 Coding Test
+
+          Python 코딩테스트 공부 기록입니다.
+
+          ## 📊 Progress
+
+          **총 해결 문제: ${TOTAL}문제**
+
+          | Level | 해결 문제 |
+          | --- | ---: |
+          | Level 0 | ${LEVEL0} |
+          | Level 1 | ${LEVEL1} |
+          | Level 2 | ${LEVEL2} |
+
+          ## 🎯 Goal
+
+          코딩테스트 기초부터 차근차근 학습하고 있습니다.
+
+          ---
+          README는 문제 풀이 기록에 따라 자동으로 업데이트됩니다.
+          EOF
+
+      - name: Commit README
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add README.md
+
+          if git diff --cached --quiet; then
+            echo "No changes"
+          else
+            git commit -m "docs: update coding test progress"
+            git push
+          fi
